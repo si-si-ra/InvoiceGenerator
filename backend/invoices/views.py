@@ -1,9 +1,11 @@
-from rest_framework import viewsets, status
+from rest_framework import viewsets, status, generics
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from rest_framework.permissions import AllowAny
 from django.db.models import Q, Sum
 from django.http import HttpResponse
 from django.utils import timezone
+from django.contrib.auth.models import User
 import datetime
 
 from .models import Customer, Invoice, InvoiceItem
@@ -232,3 +234,37 @@ class InvoiceViewSet(viewsets.ModelViewSet):
             'pending_amount': float(pending_amount),
             'recent_invoices': recent_data,
         })
+
+
+class RegisterView(generics.CreateAPIView):
+    permission_classes = [AllowAny]
+
+    def create(self, request, *args, **kwargs):
+        username = request.data.get('username')
+        email = request.data.get('email')
+        password = request.data.get('password')
+
+        if not username or not email or not password:
+            return Response(
+                {'error': 'Username, email, and password are required.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        if User.objects.filter(username=username).exists():
+            return Response(
+                {'username': 'Username already exists.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        if User.objects.filter(email=email).exists():
+            return Response(
+                {'email': 'Email already exists.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        user = User.objects.create_user(username=username, email=email, password=password)
+        return Response(
+            {'id': user.id, 'username': user.username, 'email': user.email},
+            status=status.HTTP_201_CREATED
+        )
+

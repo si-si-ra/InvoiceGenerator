@@ -5,6 +5,49 @@ const api = axios.create({
   headers: { 'Content-Type': 'application/json' },
 })
 
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem('jwtToken')
+  if (token) {
+    config.headers = config.headers || {}
+    config.headers.Authorization = `Bearer ${token}`
+  }
+  return config
+})
+
+api.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    const originalRequest = error.config
+    if (error.response?.status === 401 && !originalRequest?._retry) {
+      originalRequest._retry = true
+      const refresh = localStorage.getItem('refreshToken')
+      if (refresh) {
+        try {
+          const response = await axios.post('/api/token/refresh/', { refresh })
+          const { access } = response.data
+          localStorage.setItem('jwtToken', access)
+          api.defaults.headers.common.Authorization = `Bearer ${access}`
+          originalRequest.headers = originalRequest.headers || {}
+          originalRequest.headers.Authorization = `Bearer ${access}`
+          return api(originalRequest)
+        } catch (refreshError) {
+          logout()
+          window.location.href = '/login'
+        }
+      }
+    }
+    return Promise.reject(error)
+  }
+)
+
+export const login = (username, password) => axios.post('/api/token/', { username, password })
+export const signup = (username, email, password) => axios.post('/api/register/', { username, email, password })
+export const refreshToken = (refresh) => axios.post('/api/token/refresh/', { refresh })
+export const logout = () => {
+  localStorage.removeItem('jwtToken')
+  localStorage.removeItem('refreshToken')
+}
+
 // Customers
 export const getCustomers = (params) => api.get('/customers/', { params })
 export const getCustomer = (id) => api.get(`/customers/${id}/`)

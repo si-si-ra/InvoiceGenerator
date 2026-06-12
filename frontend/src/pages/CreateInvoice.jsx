@@ -225,19 +225,19 @@ export default function CreateInvoice() {
                               onChange={e => setItem(idx, 'description', e.target.value)} />
                           </td>
                           <td>
-                            <input type="number" min="1" className="form-control form-control-sm"
+                            <input type="number" min="1" className="form-control form-control-sm quantity-input"
                               value={item.quantity}
                               onChange={e => setItem(idx, 'quantity', e.target.value)} />
                           </td>
                           <td>
                             <input type="number" min="0" step="0.01"
-                              className={`form-control form-control-sm ${errors[`price_${idx}`] ? 'is-invalid' : ''}`}
+                              className={`form-control form-control-sm price-input ${errors[`price_${idx}`] ? 'is-invalid' : ''}`}
                               placeholder="0.00" value={item.price}
                               onChange={e => setItem(idx, 'price', e.target.value)} />
                           </td>
                           <td>
                             <input type="number" min="0" max="100" step="0.5"
-                              className="form-control form-control-sm"
+                              className="form-control form-control-sm tax-input"
                               value={item.tax_percent}
                               onChange={e => setItem(idx, 'tax_percent', e.target.value)} />
                           </td>

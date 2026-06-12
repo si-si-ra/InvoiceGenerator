@@ -59,6 +59,10 @@ body {
   min-height: 100vh;
 }
 
+.main-content.no-sidebar {
+  margin-left: 0;
+}
+
 /* Cards */
 .stat-card {
   border: none;
@@ -89,6 +93,22 @@ body {
   .sidebar, .no-print { display: none !important; }
   .main-content { margin-left: 0; padding: 0; }
   .invoice-preview { box-shadow: none !important; }
+}
+
+/* Invoice table input sizing */
+.invoice-table input.quantity-input {
+  width: 4.5rem;
+  max-width: 4.5rem;
+}
+
+.invoice-table input.price-input {
+  width: 6.5rem;
+  max-width: 6.5rem;
+}
+
+.invoice-table input.tax-input {
+  width: 4.5rem;
+  max-width: 4.5rem;
 }
 
 /* Invoice preview */

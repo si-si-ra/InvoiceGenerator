@@ -1,15 +1,29 @@
-import { BrowserRouter, Routes, Route, NavLink, Navigate } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, NavLink, Navigate, useNavigate } from 'react-router-dom'
+import { useState, useEffect } from 'react'
 import Dashboard from './pages/Dashboard'
 import InvoiceList from './pages/InvoiceList'
 import CreateInvoice from './pages/CreateInvoice'
 import InvoiceDetail from './pages/InvoiceDetail'
 import CustomerList from './pages/CustomerList'
+import Login from './pages/Login'
+import Signup from './pages/Signup'
 
-function Sidebar() {
+function isAuthenticated() {
+  return Boolean(localStorage.getItem('jwtToken'))
+}
+
+function PrivateRoute({ children }) {
+  return isAuthenticated() ? children : <Navigate replace to="/login" />
+}
+
+function Sidebar({ onLogout }) {
   return (
     <div className="sidebar">
-      <div className="sidebar-brand">
-        <i className="bi bi-receipt me-2"></i>InvoiceGen Pro
+      <div className="sidebar-brand d-flex justify-content-between align-items-center">
+        <span><i className="bi bi-receipt me-2"></i>InvoiceGen Pro</span>
+        <button className="btn btn-sm btn-outline-secondary" onClick={onLogout}>
+          <i className="bi bi-box-arrow-right"></i>
+        </button>
       </div>
       <nav className="sidebar-nav mt-2">
         <NavLink to="/" end className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>
@@ -30,18 +44,39 @@ function Sidebar() {
 }
 
 export default function App() {
+  const [authenticated, setAuthenticated] = useState(isAuthenticated())
+
+  useEffect(() => {
+    const checkAuth = () => {
+      setAuthenticated(isAuthenticated())
+    }
+
+    // Check auth on every route change and storage change
+    window.addEventListener('storage', checkAuth)
+    return () => window.removeEventListener('storage', checkAuth)
+  }, [])
+
+  const handleLogout = () => {
+    localStorage.removeItem('jwtToken')
+    localStorage.removeItem('refreshToken')
+    setAuthenticated(false)
+    window.location.href = '/login'
+  }
+
   return (
     <BrowserRouter>
-      <Sidebar />
-      <div className="main-content">
+      {authenticated && <Sidebar onLogout={handleLogout} />}
+      <div className={`main-content ${authenticated ? '' : 'no-sidebar'}`}>
         <Routes>
-          <Route path="/" element={<Dashboard />} />
-          <Route path="/invoices" element={<InvoiceList />} />
-          <Route path="/invoices/new" element={<CreateInvoice />} />
-          <Route path="/invoices/:id/edit" element={<CreateInvoice />} />
-          <Route path="/invoices/:id" element={<InvoiceDetail />} />
-          <Route path="/customers" element={<CustomerList />} />
-          <Route path="*" element={<Navigate replace to="/" />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
+          <Route path="/" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
+          <Route path="/invoices" element={<PrivateRoute><InvoiceList /></PrivateRoute>} />
+          <Route path="/invoices/new" element={<PrivateRoute><CreateInvoice /></PrivateRoute>} />
+          <Route path="/invoices/:id/edit" element={<PrivateRoute><CreateInvoice /></PrivateRoute>} />
+          <Route path="/invoices/:id" element={<PrivateRoute><InvoiceDetail /></PrivateRoute>} />
+          <Route path="/customers" element={<PrivateRoute><CustomerList /></PrivateRoute>} />
+          <Route path="*" element={<Navigate replace to={authenticated ? '/' : '/login'} />} />
         </Routes>
       </div>
     </BrowserRouter>

@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, NavLink } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, NavLink, Navigate } from 'react-router-dom'
 import Dashboard from './pages/Dashboard'
 import InvoiceList from './pages/InvoiceList'
 import CreateInvoice from './pages/CreateInvoice'
@@ -41,6 +41,7 @@ export default function App() {
           <Route path="/invoices/:id/edit" element={<CreateInvoice />} />
           <Route path="/invoices/:id" element={<InvoiceDetail />} />
           <Route path="/customers" element={<CustomerList />} />
+          <Route path="*" element={<Navigate replace to="/" />} />
         </Routes>
       </div>
     </BrowserRouter>

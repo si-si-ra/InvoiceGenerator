@@ -41,6 +41,7 @@ useEffect(() => {
 
 if (loading) return <div className="text-center py-5"><div className="spinner-border text-primary"></div></div>
 if (error) return <div className="text-center py-5 text-danger">{error}</div>
+if (!data) return <div className="text-center py-5 text-muted">No dashboard data available.</div>
 
   return (
     <div>
@@ -96,7 +97,7 @@ if (error) return <div className="text-center py-5 text-danger">{error}</div>
               </tr>
             </thead>
             <tbody>
-              {data.recent_invoices.map(inv => (
+              {(data.recent_invoices || []).map(inv => (
                 <tr key={inv.id}>
                   <td><Link to={`/invoices/${inv.id}`} className="text-primary fw-semibold">{inv.invoice_number}</Link></td>
                   <td>{inv.customer_name}</td>
